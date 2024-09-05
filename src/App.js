@@ -1,6 +1,6 @@
-import { createContext, useEffect, useState, useContext } from "react";
+import { memo, useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
-import { PostProvider, usePosts } from "./PostProvider";
+import { PostProvider, usePosts } from "./PostContext";
 
 function createRandomPost() {
   return {
@@ -10,9 +10,9 @@ function createRandomPost() {
 }
 
 function App() {
+  // Whenever `isFakeDark` changes, we toggle the `fake-dark-mode` class on the HTML element (see in "Elements" dev tool).
   const [isFakeDark, setIsFakeDark] = useState(false);
 
-  // Whenever `isFakeDark` changes, we toggle the `fake-dark-mode` class on the HTML element (see in "Elements" dev tool).
   useEffect(
     function () {
       document.documentElement.classList.toggle("fake-dark-mode");
@@ -28,6 +28,7 @@ function App() {
       >
         {isFakeDark ? "☀️" : "🌙"}
       </button>
+
       <PostProvider>
         <Header />
         <Main />
@@ -39,7 +40,7 @@ function App() {
 }
 
 function Header() {
-  // CONTEXT API ---> 3) CONSUMING CONTEXT VALUE
+  // 3) CONSUMING CONTEXT VALUE
   const { onClearPosts } = usePosts();
 
   return (
@@ -74,14 +75,14 @@ function Results() {
   return <p>🚀 {posts.length} atomic posts found</p>;
 }
 
-function Main() {
+const Main = memo(function Main() {
   return (
     <main>
       <FormAddPost />
       <Posts />
     </main>
   );
-}
+});
 
 function Posts() {
   return (
@@ -92,10 +93,9 @@ function Posts() {
 }
 
 function FormAddPost() {
+  const { onAddPost } = usePosts();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-
-  const { onAddPost } = usePosts();
 
   const handleSubmit = function (e) {
     e.preventDefault();
@@ -126,14 +126,18 @@ function List() {
   const { posts } = usePosts();
 
   return (
-    <ul>
-      {posts.map((post, i) => (
-        <li key={i}>
-          <h3>{post.title}</h3>
-          <p>{post.body}</p>
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul>
+        {posts.map((post, i) => (
+          <li key={i}>
+            <h3>{post.title}</h3>
+            <p>{post.body}</p>
+          </li>
+        ))}
+      </ul>
+
+      {/* <Test /> */}
+    </>
   );
 }
 
